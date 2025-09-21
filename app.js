@@ -2,46 +2,69 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
-const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const app = express();
+const cors = require("cors");
+
+const jwt = require("jsonwebtoken");
 const apiRouter = require("./api");
 const { router: authRouter } = require("./auth");
 const { db } = require("./database");
-const cors = require("cors");
 const initSocketServer = require("./socket-server");
-const PORT = process.env.PORT || 8080;
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
-// body parser middleware
+const app = express();
+
+const PORT = process.env.PORT || 8080;
+
+// IMPORTANT: no trailing slash in these URLs
+const FALLBACK_DEV_ORIGIN = "http://localhost:3000";
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || FALLBACK_DEV_ORIGIN;
+
+// trust proxy so secure cookies work on Render
+app.set("trust proxy", 1);
+
+// body parser
 app.use(express.json());
+
+// CORS — allow vercel + localhost during dev
+const allowedOrigins = new Set([
+  FRONTEND_ORIGIN,
+  FALLBACK_DEV_ORIGIN, // keep for local testing
+]);
 
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: (origin, cb) => {
+      // allow non-browser tools (no origin) and allowed origins
+      if (!origin || allowedOrigins.has(origin)) return cb(null, true);
+      cb(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
   })
 );
 
-// cookie parser middleware
+// cookies + logs + static
 app.use(cookieParser());
+app.use(morgan("dev"));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use(morgan("dev")); // logging middleware
-app.use(express.static(path.join(__dirname, "public"))); // serve static files from public folder
-app.use("/api", apiRouter); // mount api router
-app.use("/auth", authRouter); // mount auth router
+// Health check for Render
+app.get("/health", (_req, res) => res.status(200).send("ok"));
 
-// error handling middleware
-app.use((err, req, res, next) => {
+app.use("/api", apiRouter);
+app.use("/auth", authRouter);
+
+// error handler
+app.use((err, req, res, _next) => {
   console.error(err.stack);
-  res.sendStatus(500);
+  res.status(500).send({ error: "Server error" });
 });
 
 const runApp = async () => {
   try {
-    await db.sync();
+    await db.sync(); // or db.authenticate() if you don't want sync in prod
     console.log("✅ Connected to the database");
-    const server = app.listen(PORT, () => {
+
+    const server = app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server is running on port ${PORT}`);
     });
 
@@ -49,6 +72,7 @@ const runApp = async () => {
     console.log("🧦 Socket server initialized");
   } catch (err) {
     console.error("❌ Unable to connect to the database:", err);
+    process.exit(1);
   }
 };
 
