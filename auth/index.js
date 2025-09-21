@@ -106,14 +106,13 @@ router.post("/auth0", async (req, res) => {
 // Signup route
 router.post("/signup", async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
 
-    if (!username || !password) {
+    if (!username || !email || !password) {
       return res
         .status(400)
-        .send({ error: "Username and password are required" });
+        .send({ error: "Username, email, and password are required" });
     }
-
     if (password.length < 6) {
       return res
         .status(400)
@@ -126,9 +125,14 @@ router.post("/signup", async (req, res) => {
       return res.status(409).send({ error: "Username already exists" });
     }
 
+    const existingEmail = await User.findOne({ where: { email } });
+    if (existingEmail) {
+      return res.status(409).send({ error: "Email already in use" });
+    }
+
     // Create new user
     const passwordHash = User.hashPassword(password);
-    const user = await User.create({ username, passwordHash });
+    const user = await User.create({ username, email, passwordHash });
 
     // Generate JWT token
     const token = jwt.sign(
