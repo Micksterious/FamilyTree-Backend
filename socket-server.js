@@ -3,20 +3,19 @@ const { Server } = require("socket.io");
 let io;
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-const NODE_ENV = process.env.NODE_ENV || "development";
-const corsOptions =
-  process.env.NODE_ENV === "production"
-    ? {
-        origin: FRONTEND_URL,
-        credentials: true,
-      }
-    : {
-        cors: "*",
-      };
 
 const initSocketServer = (server) => {
   try {
-    io = new Server(server, corsOptions);
+    io = new Server(server, {
+      cors: {
+        origin: [
+          "https://family-tree-frontend-alpha.vercel.app",
+          "http://localhost:3000"
+        ],
+        credentials: true,
+        methods: ["GET", "POST"]
+      }
+    });
 
     io.on("connection", (socket) => {
       console.log(`🔗 User ${socket.id} connected to sockets`);
