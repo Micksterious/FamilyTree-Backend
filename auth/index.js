@@ -184,6 +184,7 @@ router.post("/login", async (req, res) => {
       {
         id: user.id,
         username: user.username,
+        role: user.role,  // ← ADD THIS
         auth0Id: user.auth0Id,
         email: user.email,
       },
@@ -195,7 +196,12 @@ router.post("/login", async (req, res) => {
 
     res.send({
       message: "Login successful",
-      user: { id: user.id, username: user.username },
+      token: token,  // ← ADD THIS
+      user: { 
+        id: user.id, 
+        username: user.username,
+        role: user.role  // ← ADD THIS
+      },
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -211,17 +217,20 @@ router.post("/logout", (req, res) => {
 
 // Get current user route (protected)
 router.get("/me", (req, res) => {
-  const token = req.cookies.token;
+  // Check both cookies AND Authorization header
+  const token = req.cookies.token || 
+                (req.headers.authorization && req.headers.authorization.split(' ')[1]);
 
   if (!token) {
-    return res.send({});
+    return res.status(401).json({ error: "No token provided" });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(403).send({ error: "Invalid or expired token" });
+      return res.status(403).json({ error: "Invalid or expired token" });
     }
-    res.send({ user: user });
+    // Return the decoded user data directly
+    res.json(decoded);
   });
 });
 
