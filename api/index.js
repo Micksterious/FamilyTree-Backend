@@ -6,7 +6,6 @@ const testDbRouter = require("./test-db");
 const familyMembersMod = require("./familymembers");
 const usersRouter = require("./users");
 
-console.log("🟢 Users router imported:", !!usersRouter);
 
 function pickRouter(name, mod) {
   if (!mod) return null;
@@ -28,7 +27,6 @@ try {
 router.use("/test-db", testDbRouter);
 if (familyMembersRouter) router.use("/familymembers", familyMembersRouter);
 router.use("/users", usersRouter);
-console.log("🟢 Users router mounted at /api/users");
 
 // Optional mounts
 if (relationshipsRouter) router.use("/relationships", relationshipsRouter);
