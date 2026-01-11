@@ -3,6 +3,7 @@ const router = express.Router();
 const { User } = require("../database");
 const jwt = require("jsonwebtoken");
 
+
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Middleware to verify token and extract user
@@ -47,6 +48,24 @@ router.get("/", authMiddleware, requireAdmin, async (req, res) => {
   }
 });
 
+// GET current user info (any authenticated user)
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'username', 'email', 'role', 'createdAt']
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    res.json(user);
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ error: "Failed to fetch user" });
+  }
+});
+
 // GET single user by ID (admin only)
 router.get("/:id", authMiddleware, requireAdmin, async (req, res) => {
   try {
@@ -65,23 +84,7 @@ router.get("/:id", authMiddleware, requireAdmin, async (req, res) => {
   }
 });
 
-// GET current user info (any authenticated user)
-router.get("/me", authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'username', 'email', 'role', 'createdAt']
-    });
-    
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    
-    res.json(user);
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    res.status(500).json({ error: "Failed to fetch user" });
-  }
-});
+
 
 // ==================== UPDATE ROUTES ====================
 
