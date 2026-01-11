@@ -16,9 +16,9 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // CORS — allow vercel + localhost during dev
-const VERCL_PROD = "https://family-tree-frontend-alpha.vercel.app"; // <- exact URL, no trailing slash
+const VERCEL_PROD = "https://family-tree-frontend-alpha.vercel.app";
 const FALLBACK_DEV_ORIGIN = "http://localhost:3000";
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || VERCL_PROD; // let env override if you want
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || VERCEL_PROD;
 
 // Optional: allow all vercel previews too
 const vercelPreviewRegex = /\.vercel\.app$/;
@@ -32,14 +32,14 @@ app.use(
       const allowed =
         origin === FRONTEND_ORIGIN ||
         origin === FALLBACK_DEV_ORIGIN ||
-        vercelPreviewRegex.test(origin); // comment this line out if you don't want previews
+        vercelPreviewRegex.test(origin);
 
       if (allowed) return cb(null, true);
       return cb(new Error(`CORS blocked for origin: ${origin}`));
     },
-    credentials: true, // allow cookies
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"], // no need to list Cookie
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -56,23 +56,6 @@ app.set("trust proxy", 1);
 
 // body parser
 app.use(express.json());
-
-// CORS — allow vercel + localhost during dev
-const allowedOrigins = new Set([
-  FRONTEND_ORIGIN,
-  FALLBACK_DEV_ORIGIN, // keep for local testing
-]);
-
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      // allow non-browser tools (no origin) and allowed origins
-      if (!origin || allowedOrigins.has(origin)) return cb(null, true);
-      cb(new Error(`CORS blocked for origin: ${origin}`));
-    },
-    credentials: true,
-  })
-);
 
 // cookies + logs + static
 app.use(cookieParser());
@@ -93,7 +76,7 @@ app.use((err, req, res, _next) => {
 
 const runApp = async () => {
   try {
-    await db.sync(); // or db.authenticate() if you don't want sync in prod
+    await db.sync();
     console.log("✅ Connected to the database");
 
     const server = app.listen(PORT, "0.0.0.0", () => {
