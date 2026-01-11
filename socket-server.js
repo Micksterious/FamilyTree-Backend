@@ -3,6 +3,7 @@ const { Server } = require("socket.io");
 let io;
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const NODE_ENV = process.env.NODE_ENV || "development";
 const corsOptions =
   process.env.NODE_ENV === "production"
     ? {
