@@ -3,6 +3,8 @@ const router = express.Router();
 const { User } = require("../database");
 const jwt = require("jsonwebtoken");
 
+console.log("🔵 Users router file loaded");
+
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -33,6 +35,11 @@ const requireAdmin = (req, res, next) => {
 };
 
 // ==================== GET ROUTES ====================
+
+// Test route
+router.get("/test", (_req, res) => {
+  res.json({ message: "Users route is working!" });
+});
 
 // GET all users (admin only)
 router.get("/", authMiddleware, requireAdmin, async (req, res) => {
@@ -258,5 +265,7 @@ router.delete("/:id", authMiddleware, requireAdmin, async (req, res) => {
     res.status(500).json({ error: "Failed to delete user" });
   }
 });
+
+console.log("🔵 Users router configured with routes:", router.stack.map(r => r.route?.path));
 
 module.exports = router;
