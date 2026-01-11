@@ -3,9 +3,6 @@ const router = express.Router();
 const { User } = require("../database");
 const jwt = require("jsonwebtoken");
 
-console.log("🔵 Users router file loaded");
-
-
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Middleware to verify token and extract user
@@ -265,7 +262,5 @@ router.delete("/:id", authMiddleware, requireAdmin, async (req, res) => {
     res.status(500).json({ error: "Failed to delete user" });
   }
 });
-
-console.log("🔵 Users router configured with routes:", router.stack.map(r => r.route?.path));
 
 module.exports = router;
