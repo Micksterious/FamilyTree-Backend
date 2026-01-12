@@ -34,33 +34,33 @@ const seed = async () => {
       // Grandparents generation (4)
       { firstname: "Margaret", lastname: "Chen", date_of_birth: "1945-03-15", sex: "female" },      // 1
       { firstname: "Robert", lastname: "Chen", date_of_birth: "1943-07-22", sex: "male" },          // 2
-      { firstname: "Dorothy", lastname: "Martinez", date_of_birth: "1947-11-10", sex: "female" },   // 3
-      { firstname: "James", lastname: "Martinez", date_of_birth: "1944-05-30", sex: "male" },       // 4
+      { firstname: "Dorothy", lastname: "Javier", date_of_birth: "1947-11-10", sex: "female" },     // 3
+      { firstname: "James", lastname: "Javier", date_of_birth: "1944-05-30", sex: "male" },         // 4
       
       // Parents generation (2)
-      { firstname: "Linda", lastname: "Martinez", date_of_birth: "1970-01-20", sex: "female" },     // 5 (daughter of Dorothy & James)
-      { firstname: "David", lastname: "Martinez", date_of_birth: "1968-09-14", sex: "male" },       // 6 (son of Margaret & Robert)
+      { firstname: "Mom", lastname: "Javier", date_of_birth: "1970-10-02", sex: "female" },         // 5 (daughter of Dorothy & James)
+      { firstname: "Dad", lastname: "Javier", date_of_birth: "1951-11-06", sex: "male" },           // 6 (son of Margaret & Robert)
       
       // Siblings generation (5)
-      { firstname: "Jr", lastname: "Martinez", date_of_birth: "1990-06-12", sex: "female" },     // 7 - has 6 kids
-      { firstname: "Michael", lastname: "Martinez", date_of_birth: "1992-11-30", sex: "male" },     // 8 - has 1 daughter
-      { firstname: "Jennifer", lastname: "Martinez", date_of_birth: "1994-08-18", sex: "female" },  // 9 - has 1 son
-      { firstname: "Christopher", lastname: "Martinez", date_of_birth: "1996-02-07", sex: "male" }, // 10 - no kids
-      { firstname: "Amanda", lastname: "Martinez", date_of_birth: "1998-12-15", sex: "female" },    // 11 - no kids
+      { firstname: "Jr", lastname: "Javier", date_of_birth: "1984-04-20", sex: "male" },            // 7 - has 6 kids
+      { firstname: "wander", lastname: "Javier", date_of_birth: "1992-02-05", sex: "male" },        // 8 - has 1 daughter (Summer)
+      { firstname: "MO", lastname: "Javier", date_of_birth: "1994-01-08", sex: "male" },            // 9 - no kids
+      { firstname: "Mich", lastname: "Javier", date_of_birth: "1996-02-20", sex: "male" },          // 10 - no kids
+      { firstname: "Kat", lastname: "Javier", date_of_birth: "1998-12-15", sex: "female" },         // 11 - has 1 son (Matt)
       
-      // Sarah's 6 children (2 boys, 4 girls)
-      { firstname: "Emma", lastname: "Martinez", date_of_birth: "2010-03-22", sex: "female" },      // 12
-      { firstname: "Lucas", lastname: "Martinez", date_of_birth: "2012-07-14", sex: "male" },       // 13
-      { firstname: "Sophia", lastname: "Martinez", date_of_birth: "2014-09-08", sex: "female" },    // 14
-      { firstname: "Owen", lastname: "Martinez", date_of_birth: "2016-11-25", sex: "male" },        // 15
-      { firstname: "Lily", lastname: "Martinez", date_of_birth: "2018-05-17", sex: "female" },      // 16
-      { firstname: "Mia", lastname: "Martinez", date_of_birth: "2020-01-30", sex: "female" },       // 17
+      // Jr's 6 children (2 boys, 4 girls)
+      { firstname: "CJ", lastname: "Javier", date_of_birth: "2006-03-21", sex: "male" },            // 12
+      { firstname: "DAYDAY", lastname: "Javier", date_of_birth: "2010-01-27", sex: "male" },        // 13
+      { firstname: "DORA", lastname: "Javier", date_of_birth: "2014-07-14", sex: "female" },        // 14
+      { firstname: "Mona", lastname: "Javier", date_of_birth: "2016-05-27", sex: "female" },        // 15
+      { firstname: "JJ", lastname: "Javier", date_of_birth: "2018-08-08", sex: "female" },          // 16
+      { firstname: "7", lastname: "Javier", date_of_birth: "2020-03-11", sex: "female" },           // 17
       
-      // Michael's 1 daughter
-      { firstname: "Zoe", lastname: "Martinez", date_of_birth: "2017-08-12", sex: "female" },       // 18
+      // wander's 1 daughter
+      { firstname: "Summer", lastname: "Javier", date_of_birth: "2017-08-12", sex: "female" },      // 18
       
-      // Jennifer's 1 son
-      { firstname: "Tyler", lastname: "Martinez", date_of_birth: "2019-04-05", sex: "male" },       // 19
+      // Kat's 1 son
+      { firstname: "Matt", lastname: "Javier", date_of_birth: "2019-04-05", sex: "male" },          // 19
     ]);
 
     console.log(`👨‍👩‍👧‍👦 Created ${familyMembers.length} family members`);
@@ -68,36 +68,36 @@ const seed = async () => {
     // Create relationships (parent -> child)
     const relationships = await Relationship.bulkCreate([
       // Grandparents to Parents
-      { parent_id: 3, child_id: 5 }, // Dorothy Martinez -> Linda Martinez
-      { parent_id: 4, child_id: 5 }, // James Martinez -> Linda Martinez
-      { parent_id: 1, child_id: 6 }, // Margaret Chen -> David Martinez
-      { parent_id: 2, child_id: 6 }, // Robert Chen -> David Martinez
+      { parent_id: 3, child_id: 5 }, // Dorothy Javier -> Mom
+      { parent_id: 4, child_id: 5 }, // James Javier -> Mom
+      { parent_id: 1, child_id: 6 }, // Margaret Chen -> Dad
+      { parent_id: 2, child_id: 6 }, // Robert Chen -> Dad
       
       // Parents to Siblings (5 children)
-      { parent_id: 5, child_id: 7 },  // Linda -> Sarah
-      { parent_id: 6, child_id: 7 },  // David -> Sarah
-      { parent_id: 5, child_id: 8 },  // Linda -> Michael
-      { parent_id: 6, child_id: 8 },  // David -> Michael
-      { parent_id: 5, child_id: 9 },  // Linda -> Jennifer
-      { parent_id: 6, child_id: 9 },  // David -> Jennifer
-      { parent_id: 5, child_id: 10 }, // Linda -> Christopher
-      { parent_id: 6, child_id: 10 }, // David -> Christopher
-      { parent_id: 5, child_id: 11 }, // Linda -> Amanda
-      { parent_id: 6, child_id: 11 }, // David -> Amanda
+      { parent_id: 5, child_id: 7 },  // Mom -> Jr
+      { parent_id: 6, child_id: 7 },  // Dad -> Jr
+      { parent_id: 5, child_id: 8 },  // Mom -> wander
+      { parent_id: 6, child_id: 8 },  // Dad -> wander
+      { parent_id: 5, child_id: 9 },  // Mom -> MO
+      { parent_id: 6, child_id: 9 },  // Dad -> MO
+      { parent_id: 5, child_id: 10 }, // Mom -> Mich
+      { parent_id: 6, child_id: 10 }, // Dad -> Mich
+      { parent_id: 5, child_id: 11 }, // Mom -> Kat
+      { parent_id: 6, child_id: 11 }, // Dad -> Kat
       
-      // Sarah's 6 children
-      { parent_id: 7, child_id: 12 }, // Sarah -> Emma
-      { parent_id: 7, child_id: 13 }, // Sarah -> Lucas
-      { parent_id: 7, child_id: 14 }, // Sarah -> Sophia
-      { parent_id: 7, child_id: 15 }, // Sarah -> Owen
-      { parent_id: 7, child_id: 16 }, // Sarah -> Lily
-      { parent_id: 7, child_id: 17 }, // Sarah -> Mia
+      // Jr's 6 children
+      { parent_id: 7, child_id: 12 }, // Jr -> CJ
+      { parent_id: 7, child_id: 13 }, // Jr -> DAYDAY
+      { parent_id: 7, child_id: 14 }, // Jr -> DORA
+      { parent_id: 7, child_id: 15 }, // Jr -> Mona
+      { parent_id: 7, child_id: 16 }, // Jr -> JJ
+      { parent_id: 7, child_id: 17 }, // Jr -> 7
       
-      // Michael's 1 daughter
-      { parent_id: 8, child_id: 18 }, // Michael -> Zoe
+      // wander's 1 daughter
+      { parent_id: 8, child_id: 18 }, // wander -> Summer
       
-      // Jennifer's 1 son
-      { parent_id: 9, child_id: 19 }, // Jennifer -> Tyler
+      // Kat's 1 son
+      { parent_id: 11, child_id: 19 }, // Kat -> Matt
     ]);
 
     console.log(`🔗 Created ${relationships.length} family relationships`);
