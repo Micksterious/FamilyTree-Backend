@@ -32,11 +32,33 @@ router.get("/", async (_req, res) => {
 router.get("/tree/cytoscape", async (_req, res) => {
   try {
     const members = await FamilyMember.findAll({
-      attributes: ["id", "firstname", "lastname", "date_of_birth", "sex"],
+      attributes: ["id", "firstname", "lastname", "date_of_birth", "date_of_death", "sex"],
     });
 
     const relationships = await Relationship.findAll({
       attributes: ["parent_id", "child_id"],
+    });
+
+    // Group children by parent for sorting
+    const childrenByParent = {};
+    relationships.forEach((rel) => {
+      if (!childrenByParent[rel.parent_id]) {
+        childrenByParent[rel.parent_id] = [];
+      }
+      childrenByParent[rel.parent_id].push(rel.child_id);
+    });
+
+    // Sort siblings by birth date (oldest to youngest)
+    Object.keys(childrenByParent).forEach((parentId) => {
+      childrenByParent[parentId].sort((aId, bId) => {
+        const memberA = members.find(m => m.id === aId);
+        const memberB = members.find(m => m.id === bId);
+        
+        const dateA = memberA?.date_of_birth ? new Date(memberA.date_of_birth) : new Date('9999-12-31');
+        const dateB = memberB?.date_of_birth ? new Date(memberB.date_of_birth) : new Date('9999-12-31');
+        
+        return dateA - dateB;
+      });
     });
 
     // Convert to Cytoscape format
@@ -46,18 +68,29 @@ router.get("/tree/cytoscape", async (_req, res) => {
         label: `${member.firstname} ${member.lastname}`,
         firstname: member.firstname,
         lastname: member.lastname,
-        dob: member.date_of_birth,
+        birthDate: member.date_of_birth,
+        deathDate: member.date_of_death,
         sex: member.sex,
       },
     }));
 
-    const edges = relationships.map((rel) => ({
-      data: {
-        id: `parent-${rel.parent_id}-child-${rel.child_id}`,
-        source: `member-${rel.parent_id}`,
-        target: `member-${rel.child_id}`,
-      },
-    }));
+    // Create edges maintaining the sorted order
+    const edges = [];
+    let edgeOrder = 0;
+    
+    relationships.forEach((rel) => {
+      const siblings = childrenByParent[rel.parent_id] || [];
+      const childPosition = siblings.indexOf(rel.child_id);
+      
+      edges.push({
+        data: {
+          id: `parent-${rel.parent_id}-child-${rel.child_id}`,
+          source: `member-${rel.parent_id}`,
+          target: `member-${rel.child_id}`,
+          order: edgeOrder + childPosition, // Add order hint for layout
+        },
+      });
+    });
 
     res.json({
       nodes,
