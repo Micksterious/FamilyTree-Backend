@@ -9,6 +9,7 @@ const FamilyMember = sequelize.define(
     firstname: { type: DataTypes.STRING(100), allowNull: false },
     lastname: { type: DataTypes.STRING(100), allowNull: false },
     date_of_birth: { type: DataTypes.DATEONLY },
+    date_of_death: { type: DataTypes.DATEONLY },
     sex: {
       type: DataTypes.ENUM("male", "female", "other"),
       allowNull: true,
