@@ -23,25 +23,12 @@ const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || VERCEL_PROD;
 // Optional: allow all vercel previews too
 const vercelPreviewRegex = /\.vercel\.app$/;
 
-app.use(
-  cors({
-    origin(origin, cb) {
-      // allow non-browser tools (no Origin header)
-      if (!origin) return cb(null, true);
-
-      const allowed =
-        origin === FRONTEND_ORIGIN ||
-        origin === FALLBACK_DEV_ORIGIN ||
-        vercelPreviewRegex.test(origin);
-
-      if (allowed) return cb(null, true);
-      return cb(new Error(`CORS blocked for origin: ${origin}`));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors({
+  origin: ["http://localhost:3000", "http://localhost:8000", VERCEL_PROD],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 // (Optional) quick visibility when debugging:
 app.use((req, _res, next) => {
@@ -83,6 +70,10 @@ const runApp = async () => {
       console.log(`🚀 Server is running on port ${PORT}`);
     });
 
+    server.on('error', (err) => {
+      console.error("❌ Server error:", err);
+    });
+
     initSocketServer(server);
     console.log("🧦 Socket server initialized");
   } catch (err) {
@@ -91,6 +82,9 @@ const runApp = async () => {
   }
 };
 
-runApp();
+runApp().catch(err => {
+  console.error("❌ Fatal error:", err);
+  process.exit(1);
+});
 
 module.exports = app;

@@ -1,7 +1,7 @@
 // FamilyTree-Backend/api/familymembers.js
 const express = require("express");
 const router = express.Router();
-const { FamilyMember, Relationship } = require("../database");
+const { FamilyMember, Relationship, Spouse } = require("../database");
 
 // CREATE
 router.post("/", async (req, res) => {
@@ -37,6 +37,10 @@ router.get("/tree/cytoscape", async (_req, res) => {
 
     const relationships = await Relationship.findAll({
       attributes: ["parent_id", "child_id"],
+    });
+
+    const spouses = await Spouse.findAll({
+      attributes: ["partner1_id", "partner2_id"],
     });
 
     // Group children by parent for sorting
@@ -78,6 +82,7 @@ router.get("/tree/cytoscape", async (_req, res) => {
     const edges = [];
     let edgeOrder = 0;
     
+    // Parent-child edges
     relationships.forEach((rel) => {
       const siblings = childrenByParent[rel.parent_id] || [];
       const childPosition = siblings.indexOf(rel.child_id);
@@ -87,7 +92,20 @@ router.get("/tree/cytoscape", async (_req, res) => {
           id: `parent-${rel.parent_id}-child-${rel.child_id}`,
           source: `member-${rel.parent_id}`,
           target: `member-${rel.child_id}`,
-          order: edgeOrder + childPosition, // Add order hint for layout
+          order: edgeOrder + childPosition,
+          type: "parent-child",
+        },
+      });
+    });
+
+    // Spouse edges (bidirectional visualization)
+    spouses.forEach((spouse) => {
+      edges.push({
+        data: {
+          id: `spouse-${spouse.partner1_id}-${spouse.partner2_id}`,
+          source: `member-${spouse.partner1_id}`,
+          target: `member-${spouse.partner2_id}`,
+          type: "spouse",
         },
       });
     });

@@ -5,6 +5,7 @@ const router = express.Router();
 const testDbRouter = require("./test-db");
 const familyMembersMod = require("./familymembers");
 const usersRouter = require("./users");
+const spousesRouter = require("./spouses");
 
 
 function pickRouter(name, mod) {
@@ -27,6 +28,7 @@ try {
 router.use("/test-db", testDbRouter);
 if (familyMembersRouter) router.use("/familymembers", familyMembersRouter);
 router.use("/users", usersRouter);
+router.use("/spouses", spousesRouter);
 
 // Optional mounts
 if (relationshipsRouter) router.use("/relationships", relationshipsRouter);

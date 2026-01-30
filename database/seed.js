@@ -1,5 +1,5 @@
 const db = require("./db");
-const { User, FamilyMember, Relationship } = require("./index");
+const { User, FamilyMember, Relationship, Spouse } = require("./index");
 
 const seed = async () => {
   try {
@@ -57,10 +57,10 @@ const seed = async () => {
       { firstname: "7", lastname: "Javier", date_of_birth: "2020-03-11", sex: "female" },           // 17
       
       // wander's 1 daughter
-      { firstname: "Summer", lastname: "Javier", date_of_birth: "2017-08-12", sex: "female" },      // 18
+      { firstname: "Summer", lastname: "Javier", date_of_birth: "2021-12-28", sex: "female" },      // 18
       
       // Kat's 1 son
-      { firstname: "Matt", lastname: "Javier", date_of_birth: "2019-04-05", sex: "male" },          // 19
+      { firstname: "Matt", lastname: "Javier", date_of_birth: "2019-11-23", sex: "male" },          // 19
     ]);
 
     console.log(`👨‍👩‍👧‍👦 Created ${familyMembers.length} family members`);
@@ -74,8 +74,7 @@ const seed = async () => {
       { parent_id: 2, child_id: 6 }, // Robert Chen -> Dad
       
       // Parents to Siblings (5 children)
-      { parent_id: 5, child_id: 7 },  // Mom -> Jr
-      { parent_id: 6, child_id: 7 },  // Dad -> Jr
+      { parent_id: 6, child_id: 7 },  // Dad -> Jr (half-brother, not Mom's son)
       { parent_id: 5, child_id: 8 },  // Mom -> wander
       { parent_id: 6, child_id: 8 },  // Dad -> wander
       { parent_id: 5, child_id: 9 },  // Mom -> MO
@@ -101,6 +100,15 @@ const seed = async () => {
     ]);
 
     console.log(`🔗 Created ${relationships.length} family relationships`);
+
+    // Create spouse relationships
+    const spouses = await Spouse.bulkCreate([
+      { partner1_id: 1, partner2_id: 2 }, // Margaret Chen & Robert Chen (Dad's parents)
+      { partner1_id: 3, partner2_id: 4 }, // Dorothy Javier & James Javier (Mom's parents)
+      { partner1_id: 5, partner2_id: 6 }, // Mom & Dad
+    ]);
+
+    console.log(`💑 Created ${spouses.length} spouse relationships`);
     console.log("🌱 Seeded the database");
   } catch (error) {
     console.error("Error seeding database:", error);
