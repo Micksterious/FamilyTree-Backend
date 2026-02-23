@@ -101,9 +101,9 @@ router.put("/:id/role", authMiddleware, requireAdmin, async (req, res) => {
     const { role } = req.body;
     const userId = req.params.id;
 
-    // Validate role
-    if (!['user', 'admin'].includes(role)) {
-      return res.status(400).json({ error: "Invalid role. Must be 'user' or 'admin'" });
+    // Validate role type and value
+    if (typeof role !== "string" || !['user', 'admin'].includes(role)) {
+      return res.status(400).json({ error: "Invalid role. Must be 'user' or 'admin' and a string." });
     }
 
     const user = await User.findByPk(userId);
@@ -137,17 +137,24 @@ router.put("/:id/role", authMiddleware, requireAdmin, async (req, res) => {
 // PUT update user details (admin only)
 router.put("/:id", authMiddleware, requireAdmin, async (req, res) => {
   try {
+
     const userId = req.params.id;
     const { username, email, role } = req.body;
+
+    // Validate types
+    if (username && typeof username !== "string") {
+      return res.status(400).json({ error: "Username must be a string" });
+    }
+    if (email && (typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email))) {
+      return res.status(400).json({ error: "Email must be a valid email address" });
+    }
+    if (role && (typeof role !== "string" || !['user', 'admin'].includes(role))) {
+      return res.status(400).json({ error: "Invalid role. Must be 'user' or 'admin' and a string." });
+    }
 
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
-    }
-
-    // Validate role if provided
-    if (role && !['user', 'admin'].includes(role)) {
-      return res.status(400).json({ error: "Invalid role. Must be 'user' or 'admin'" });
     }
 
     // Prevent changing your own role
@@ -196,6 +203,7 @@ router.put("/:id", authMiddleware, requireAdmin, async (req, res) => {
 // PATCH update user password (admin or own account)
 router.patch("/:id/password", authMiddleware, async (req, res) => {
   try {
+
     const userId = parseInt(req.params.id);
     const { currentPassword, newPassword } = req.body;
 
@@ -204,8 +212,8 @@ router.patch("/:id/password", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "Not authorized to change this password" });
     }
 
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    if (typeof newPassword !== "string" || newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be a string and at least 6 characters" });
     }
 
     const user = await User.findByPk(userId);
