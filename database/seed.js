@@ -6,28 +6,6 @@ const seed = async () => {
     db.logging = false;
     await db.sync({ force: true }); // Drop and recreate tables
 
-    const users = await User.bulkCreate([
-      { 
-        username: "Tester", 
-        email: "tester@example.com", 
-        passwordHash: User.hashPassword("123456"),
-        role: "admin"
-      },
-      { 
-        username: "user1", 
-        email: "user1@example.com", 
-        passwordHash: User.hashPassword("user111"),
-        role: "user"
-      },
-      { 
-        username: "user2", 
-        email: "user2@example.com", 
-        passwordHash: User.hashPassword("user222"),
-        role: "user"
-      },
-    ]);
-
-    console.log(`👤 Created ${users.length} users`);
 
     // Create family tree with 4 grandparents, 2 parents, 5 siblings
     const familyMembers = await FamilyMember.bulkCreate([
@@ -36,18 +14,18 @@ const seed = async () => {
       { firstname: "Robert", lastname: "Chen", date_of_birth: "1943-07-22", sex: "male" },          // 2
       { firstname: "Dorothy", lastname: "Javier", date_of_birth: "1947-11-10", sex: "female" },     // 3
       { firstname: "James", lastname: "Javier", date_of_birth: "1944-05-30", sex: "male" },         // 4
-      
+
       // Parents generation (2)
       { firstname: "Mom", lastname: "Javier", date_of_birth: "1970-10-02", sex: "female" },         // 5 (daughter of Dorothy & James)
       { firstname: "Dad", lastname: "Javier", date_of_birth: "1951-11-06", sex: "male" },           // 6 (son of Margaret & Robert)
-      
+
       // Siblings generation (5)
       { firstname: "Jr", lastname: "Javier", date_of_birth: "1984-04-20", sex: "male" },            // 7 - has 6 kids
       { firstname: "wander", lastname: "Javier", date_of_birth: "1992-02-05", sex: "male" },        // 8 - has 1 daughter (Summer)
       { firstname: "MO", lastname: "Javier", date_of_birth: "1994-01-08", sex: "male" },            // 9 - no kids
-      { firstname: "Mich", lastname: "Javier", date_of_birth: "1996-02-20", sex: "male" },          // 10 - no kids
+      { firstname: "Michelangelo", lastname: "Javier", date_of_birth: "1996-02-20", sex: "male" },          // 10 - no kids
       { firstname: "Kat", lastname: "Javier", date_of_birth: "1998-12-15", sex: "female" },         // 11 - has 1 son (Matt)
-      
+
       // Jr's 6 children (2 boys, 4 girls)
       { firstname: "CJ", lastname: "Javier", date_of_birth: "2006-03-21", sex: "male" },            // 12
       { firstname: "DAYDAY", lastname: "Javier", date_of_birth: "2010-01-27", sex: "male" },        // 13
@@ -55,15 +33,41 @@ const seed = async () => {
       { firstname: "Mona", lastname: "Javier", date_of_birth: "2016-05-27", sex: "female" },        // 15
       { firstname: "JJ", lastname: "Javier", date_of_birth: "2018-08-08", sex: "female" },          // 16
       { firstname: "7", lastname: "Javier", date_of_birth: "2020-03-11", sex: "female" },           // 17
-      
+
       // wander's 1 daughter
       { firstname: "Summer", lastname: "Javier", date_of_birth: "2021-12-28", sex: "female" },      // 18
-      
+
       // Kat's 1 son
       { firstname: "Matt", lastname: "Javier", date_of_birth: "2019-11-23", sex: "male" },          // 19
     ]);
 
     console.log(`👨‍👩‍👧‍👦 Created ${familyMembers.length} family members`);
+
+    const users = await User.bulkCreate([
+      { 
+        username: "Tester", 
+        email: "tester@example.com", 
+        passwordHash: User.hashPassword("123456"),
+        role: "admin",
+        familyMemberId: 10 // Now paired with family member ID 10
+      },
+      { 
+        username: "user1", 
+        email: "user1@example.com", 
+        passwordHash: User.hashPassword("user111"),
+        role: "user",
+        familyMemberId: 2 // Robert Chen
+      },
+      { 
+        username: "user2", 
+        email: "user2@example.com", 
+        passwordHash: User.hashPassword("user222"),
+        role: "user",
+        familyMemberId: 3 // Dorothy Javier
+      },
+    ]);
+
+    console.log(`👤 Created ${users.length} users`);
 
     // Create relationships (parent -> child)
     const relationships = await Relationship.bulkCreate([

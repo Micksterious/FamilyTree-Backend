@@ -59,7 +59,7 @@ router.get("/", authMiddleware, requireAdmin, async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'username', 'email', 'role', 'createdAt']
+      attributes: ['id', 'username', 'email', 'role', 'createdAt', 'familyMemberId']
     });
     
     if (!user) {

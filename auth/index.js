@@ -117,7 +117,7 @@ router.post("/auth0", async (req, res) => {
 router.post("/signup", async (req, res) => {
   try {
 
-    const { username, email, password } = req.body;
+    const { username, email, password, familyMemberCode } = req.body;
 
     if (
       typeof username !== "string" || !username.trim() ||
@@ -141,9 +141,21 @@ router.post("/signup", async (req, res) => {
       return res.status(409).send({ error: "Email already in use" });
     }
 
+
+    // If a familyMemberCode is provided, check if it exists
+    let familyMemberId = null;
+    if (familyMemberCode) {
+      const { FamilyMember } = require("../database");
+      const fam = await FamilyMember.findByPk(familyMemberCode);
+      if (!fam) {
+        return res.status(400).send({ error: "Invalid family member code" });
+      }
+      familyMemberId = fam.id;
+    }
+
     // Create new user
     const passwordHash = User.hashPassword(password);
-    const user = await User.create({ username, email, passwordHash });
+    const user = await User.create({ username, email, passwordHash, familyMemberId });
 
     // Generate JWT token
     const token = jwt.sign(
@@ -227,21 +239,30 @@ router.post("/logout", (req, res) => {
 });
 
 // Get current user route (protected)
-router.get("/me", (req, res) => {
-  // Check both cookies AND Authorization header
+router.get("/me", async (req, res) => {
   const token = req.cookies.token || 
                 (req.headers.authorization && req.headers.authorization.split(' ')[1]);
 
-  if (!token) {
-    return res.status(401).json({ error: "No token provided" });
-  }
+  if (!token) return res.status(401).json({ error: "No token provided" });
 
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ error: "Invalid or expired token" });
+  jwt.verify(token, JWT_SECRET, async (err, decoded) => {
+    if (err) return res.status(403).json({ error: "Invalid or expired token" });
+
+    try {
+      const user = await User.findByPk(decoded.id);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      res.json({
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        email: user.email,
+        auth0Id: user.auth0Id,
+        familyMemberId: user.familyMemberId, // ← now included
+      });
+    } catch (e) {
+      res.status(500).json({ error: "Server error" });
     }
-    // Return the decoded user data directly
-    res.json(decoded);
   });
 });
 

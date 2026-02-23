@@ -42,6 +42,15 @@ const User = db.define(
       defaultValue: "user",
       // field: "role",
     },
+    familyMemberId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "familymembers",
+        key: "id"
+      },
+      field: "family_member_id"
+    },
   },
   {
     tableName: "users",
@@ -49,6 +58,10 @@ const User = db.define(
     underscored: true, // uses created_at / updated_at (your DB has these)
   }
 );
+
+// associations
+const FamilyMember = require("./familymember");
+User.belongsTo(FamilyMember, { foreignKey: "familyMemberId", as: "familyMember" });
 
 // helpers
 User.prototype.checkPassword = function (password) {
