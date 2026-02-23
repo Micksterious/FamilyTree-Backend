@@ -36,10 +36,17 @@ const authenticateJWT = (req, res, next) => {
 // Auth0 authentication route
 router.post("/auth0", async (req, res) => {
   try {
+
     const { auth0Id, email, username } = req.body;
 
-    if (!auth0Id) {
-      return res.status(400).send({ error: "Auth0 ID is required" });
+    if (typeof auth0Id !== "string" || !auth0Id.trim()) {
+      return res.status(400).send({ error: "Auth0 ID is required and must be a string" });
+    }
+    if (email && (typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email))) {
+      return res.status(400).send({ error: "Email must be a valid email address" });
+    }
+    if (username && typeof username !== "string") {
+      return res.status(400).send({ error: "Username must be a string" });
     }
 
     // Try to find existing user by auth0Id first
@@ -109,17 +116,18 @@ router.post("/auth0", async (req, res) => {
 // Signup route
 router.post("/signup", async (req, res) => {
   try {
+
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-      return res
-        .status(400)
-        .send({ error: "Username, email, and password are required" });
+    if (
+      typeof username !== "string" || !username.trim() ||
+      typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email) ||
+      typeof password !== "string" || !password.trim()
+    ) {
+      return res.status(400).send({ error: "Username, email, and password are required and must be valid strings. Email must be a valid email address." });
     }
     if (password.length < 6) {
-      return res
-        .status(400)
-        .send({ error: "Password must be at least 6 characters long" });
+      return res.status(400).send({ error: "Password must be at least 6 characters long" });
     }
 
     // Check if user already exists
