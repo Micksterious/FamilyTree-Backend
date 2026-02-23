@@ -3,7 +3,10 @@ const router = express.Router();
 const { User } = require("../database");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is not set.");
+}
 
 // Middleware to verify token and extract user
 const authMiddleware = async (req, res, next) => {
