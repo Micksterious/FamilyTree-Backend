@@ -1,10 +1,10 @@
 require("dotenv").config();
 const express = require("express");
+const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-
 const jwt = require("jsonwebtoken");
 const apiRouter = require("./api");
 const { router: authRouter } = require("./auth");
@@ -12,7 +12,6 @@ const { db } = require("./database");
 const initSocketServer = require("./socket-server");
 
 const app = express();
-
 const PORT = process.env.PORT || 8080;
 
 // CORS — allow vercel + localhost during dev
@@ -22,6 +21,20 @@ const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || VERCEL_PROD;
 
 // Optional: allow all vercel previews too
 const vercelPreviewRegex = /\.vercel\.app$/;
+
+// ─── Security headers (disables X-Powered-By + other hardening) ───────────────
+app.use(
+  helmet({
+    // Allow cross-origin resources if your app embeds external content;
+    // set to true for stricter isolation.
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    // If you're NOT serving an HTML frontend from this server, you can
+    // leave contentSecurityPolicy as default (enabled). If you are, tune
+    // the directives to match your actual sources.
+    contentSecurityPolicy: false,
+  })
+);
+// ─────────────────────────────────────────────────────────────────────────────
 
 app.use(cors({
   origin: ["http://localhost:3000", "http://localhost:8000", VERCEL_PROD],
